@@ -2,6 +2,10 @@ set(EXE_NAME pybela-drumsynth)
 
 file(GLOB SRC_FILES *.cpp)
 
+# exclude Watcher.cpp from the build
+get_filename_component(full_path_watcher_cpp ${CMAKE_CURRENT_SOURCE_DIR}/Watcher.cpp ABSOLUTE)
+list(REMOVE_ITEM SRC_FILES "${full_path_watcher_cpp}")
+
 add_executable(${EXE_NAME} ${SRC_FILES})
 
 target_include_directories(
