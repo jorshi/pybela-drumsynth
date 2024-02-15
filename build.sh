@@ -47,8 +47,8 @@ rsync \
 -avzP build/src/pybela-drumsynth \
 root@$BBB_HOSTNAME:~/Bela/projects/pybela-drumsynth-inference/
 
-# Copy the ckpt file to Bela
-rsync \
---timeout=10 \
--avzP model.jit \
-root@$BBB_HOSTNAME:~/Bela/projects/pybela-drumsynth-inference/
+# Copy the ckpt file to Bela -- this is handled in the notebook
+# rsync \
+# --timeout=10 \
+# -avzP model.jit \
+# root@$BBB_HOSTNAME:~/Bela/projects/pybela-drumsynth-inference/
