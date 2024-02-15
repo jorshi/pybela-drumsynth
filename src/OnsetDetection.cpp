@@ -1,9 +1,7 @@
-#include <OnsetDetection.h>
 #include <cmath>
 
-#ifdef __linux__
-#define _finite(v) (isfinite((v)))
-#endif
+#include "OnsetDetection.h"
+
 
 OnsetDetection::OnsetDetection() : justTriggered(false), debounce(0), prevValue(0.0)
 {

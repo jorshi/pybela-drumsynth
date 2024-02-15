@@ -5,10 +5,11 @@
  * information to control a drum
  */
  
- #include <SnareDrum.h>
- #include <OnsetDetection.h>
  #include <libraries/ne10/NE10.h>
  #include <vector>
+
+ #include "SnareDrum.h"
+ #include "OnsetDetection.h"
  
  #define ONSET_BUFFER_SIZE 1024	// Circular buffer for onset features
  #define FFT_SIZE 512			// FFT size for onset spectral features

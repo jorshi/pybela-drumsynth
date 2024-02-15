@@ -1,7 +1,8 @@
-#include <Tonal.h>
 #include <Bela.h>
 #include <cmath>
 #include <libraries/math_neon/math_neon.h>
+
+#include "Tonal.h"
 
 // Constructor
 Tonal::Tonal() : sampleRate(44100), tuning(100.0), phase(0.0), phaseIncr(0.0)

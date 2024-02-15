@@ -1,6 +1,7 @@
-#include<Bela.h>
-#include <Envelope.h>
+#include <Bela.h>
 #include <cmath>
+
+#include "Envelope.h"
 
 
 // Constructor

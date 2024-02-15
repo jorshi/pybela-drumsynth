@@ -7,21 +7,27 @@
  * can be triggered and controlled in response to audio
  * input from a microphone.
  */
+ 
+ #define WATCHING 0 // Turn on to watch with PyBela - disables GUI.
+ 
 #include <Bela.h>
-#include <Watcher.h>
-#include <libraries/Scope/Scope.h>
 #include <libraries/Gui/Gui.h>
 #include <libraries/GuiController/GuiController.h>
 #include <algorithm>
 #include <cmath>
 
-#include <SnareDrum.h>
-#include <DrumController.h>
+#include "SnareDrum.h"
+#include "DrumController.h"
 
-#define WATCHING 0 // Turn on to watch with PyBela - disables GUI.
+#if WATCHING == 1
 
-// Bela oscilloscope
-Scope gScope;
+#include "Watcher.h"
+
+ // Watcher variables
+Watcher<float> spectralCentroid("spectralCentroid");
+Watcher<float> onsetEnergy("onsetEnergy");
+
+#endif
 
 // Browser-based GUI to adjust parameters
 Gui gGui;
@@ -35,15 +41,8 @@ DrumController controller(drum);
 int paramStartIndex;
 int numParams;
 
- // Watcher variables
-Watcher<float> spectralCentroid("spectralCentroid");
-Watcher<float> onsetEnergy("onsetEnergy");
-
 bool setup(BelaContext *context, void *userData)
 {
-	// Initialise the scope
-	gScope.setup(3, context->audioSampleRate);
-	
 	// Setup processors
 	drum.prepare(context->audioSampleRate);
 	controller.prepare(context->audioSampleRate);
@@ -58,15 +57,15 @@ bool setup(BelaContext *context, void *userData)
 	tonal.setDecay(0.25);
 	tonal.setTuning(0.5);
 	
-	if (WATCHING) {
-		// Setup the Watcher -- need to add both these lines for the watcher
-		Bela_getDefaultWatcherManager()->getGui().setup(context->projectName);
-		Bela_getDefaultWatcherManager()->setup(context->audioSampleRate);
-	} else {
-		// Set up the GUI
-		gGui.setup(context->projectName);
-		gGuiController.setup(&gGui, "Drum Control");
-	}
+#if WATCHING == 1
+	// Setup the Watcher -- need to add both these lines for the watcher
+	Bela_getDefaultWatcherManager()->getGui().setup(context->projectName);
+	Bela_getDefaultWatcherManager()->setup(context->audioSampleRate);
+#else
+	// Set up the GUI
+	gGui.setup(context->projectName);
+	gGuiController.setup(&gGui, "Drum Control");
+#endif
 	
 	// Arguments: name, default value, minimum, maximum, increment
 	gGuiController.addSlider("Listen", 0.0, 0.0, 1.0, 1.0);
@@ -131,24 +130,10 @@ void render(BelaContext *context, void *userData)
 	
 	int numAudioFrames = context->audioFrames;
 	for(int n = 0; n < numAudioFrames; n++) {
-		
-		// Tick watcher if watching
-		if (WATCHING) {
-			uint64_t frames = context->audioFramesElapsed + n;
-			Bela_getDefaultWatcherManager()->tick(frames);
-		}
-		
 		// Read from the microphone and process with the synth controller
 		float x = audioRead(context, n, 0);
 	
-		// Update the controller -- will return true if new onset features are available
-		// Log those features if we're watching.
 		bool triggered = controller.process(x);
-		if (triggered && WATCHING) {
-			spectralCentroid = controller.getSpectralCentroid();
-			onsetEnergy = controller.getOnsetEnergy();
-			rt_printf("sc: %f; gain: %f\n", static_cast<float>(spectralCentroid), static_cast<float>(onsetEnergy));
-		}
 		
 		// Get the next audio sample from the drum
 		float y = drum.process();
@@ -158,8 +143,15 @@ void render(BelaContext *context, void *userData)
 			audioWrite(context, n, channel, y);
 		}
 		
-		// Scope for evaluation
-		//gScope.log(drum.getGain(), drum.getMix(), x);
+#if WATCHING == 1
+		uint64_t frames = context->audioFramesElapsed + n;
+		Bela_getDefaultWatcherManager()->tick(frames);
+		if (triggered) {
+			spectralCentroid = controller.getSpectralCentroid();
+			onsetEnergy = controller.getOnsetEnergy();
+			rt_printf("sc: %f; gain: %f\n", static_cast<float>(spectralCentroid), static_cast<float>(onsetEnergy));
+		}
+#endif	
 	}
 }
 

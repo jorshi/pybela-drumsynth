@@ -1,8 +1,9 @@
 #include <Bela.h>
-#include <Noise.h>
 #include <cstdlib>
 #include <cmath>
 #include <libraries/math_neon/math_neon.h>
+
+#include "Noise.h"
 
 
 Noise::Noise() : sampleRate(44100.0), phase(0.0), phaseIncr(0.0), tone(100.0), color(100.0)

@@ -1,6 +1,7 @@
-#include <SnareDrum.h>
 #include <cmath>
 #include <Bela.h>
+
+#include "SnareDrum.h"
 
 
 void SnareDrum::prepare(double sampleRate)

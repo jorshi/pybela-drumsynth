@@ -8,8 +8,9 @@
  */
  #pragma once
  
- #include <EnvelopeFollower.h>
  #include <libraries/Biquad/Biquad.h>
+
+ #include "EnvelopeFollower.h"
  
  class OnsetDetection {
  public:

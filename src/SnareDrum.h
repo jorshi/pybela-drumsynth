@@ -3,8 +3,8 @@
  */
 #pragma once
 
-#include <Noise.h>
-#include <Tonal.h>
+#include "Noise.h"
+#include "Tonal.h"
 
 
 class SnareDrum {
