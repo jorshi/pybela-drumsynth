@@ -44,17 +44,11 @@ root@$BBB_HOSTNAME:Bela/lib/libtorch.so
 
 rsync \
 --timeout=10 \
--avzP build/src/pot-inference \
-root@$BBB_HOSTNAME:~/Bela/projects/pot-inference/
-
-rsync \
---timeout=10 \
--avzP src/waves.wav \
-root@$BBB_HOSTNAME:~/Bela/projects/pot-inference/
+-avzP build/src/pybela-drumsynth \
+root@$BBB_HOSTNAME:~/Bela/projects/pybela-drumsynth-inference/
 
 # Copy the ckpt file to Bela
 rsync \
 --timeout=10 \
 -avzP model.jit \
-root@$BBB_HOSTNAME:~/Bela/projects/pot-inference/
-
+root@$BBB_HOSTNAME:~/Bela/projects/pybela-drumsynth-inference/
