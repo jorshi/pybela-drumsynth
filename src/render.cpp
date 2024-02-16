@@ -17,15 +17,20 @@
 #include <cmath>
 
 #include "SnareDrum.h"
-#include "DrumController.h"
+
 
 #if WATCHING == 1
 
 #include "Watcher.h"
+#include "DrumController.h"
 
  // Watcher variables
 Watcher<float> spectralCentroid("spectralCentroid");
 Watcher<float> onsetEnergy("onsetEnergy");
+
+#else
+
+#include "DrumControllerInference.h"
 
 #endif
 
