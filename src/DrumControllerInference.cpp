@@ -3,7 +3,7 @@
 #include <iostream>
 #include <algorithm>
 
-#include "DrumController.h"
+#include "DrumControllerInference.h"
 
 
 
