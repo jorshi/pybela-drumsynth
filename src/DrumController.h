@@ -90,6 +90,9 @@ private:
 
 	// torch drum mapping model
 	torch::jit::script::Module model;
+	bool modelLoaded;
+	std::vector<float> modelInput;
+	std::vector<float> modelOutput;
 	
 	// Private methods for creating audio -> parameter mappings
 	
@@ -117,5 +120,7 @@ private:
 	// Calculate the final value for a synthesis parameter including the
 	// modulations from onsetEnergy and spectralCentoid.
 	float getModulatedParameterValue(int parameterIndex);
-	
+
+	// Update parameters from the model
+	void updateSynthParametersFromModel();
 };

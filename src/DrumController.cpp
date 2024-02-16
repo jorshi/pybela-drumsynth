@@ -8,7 +8,7 @@
 
 
 DrumController::DrumController(SnareDrum& d) 
-: sampleRate(44100.0), drum(d), currentMode(play), justTriggered(false), triggeredDrum(false), elapsedSamples(0)
+: sampleRate(44100.0), drum(d), currentMode(play), justTriggered(false), triggeredDrum(false), elapsedSamples(0), modelLoaded(false)
 {
 	// Initialize memory for FFT
 	fftIn = (ne10_fft_cpx_float32_t*) NE10_MALLOC (FFT_SIZE * sizeof (ne10_fft_cpx_float32_t));
@@ -114,10 +114,17 @@ bool DrumController::loadModel(AppOptions *opts)
 {
 	try {
         model = torch::jit::load(opts->modelPath.c_str());
+		std::cerr << "Model loaded successfully" << std::endl;
     } catch (const c10::Error& e) {
         std::cerr << "Error loading the model: " << e.msg() << std::endl;
         return false;
     }
+
+	modelInput.resize(2);
+	modelOutput.resize(7);
+
+	modelLoaded = true;
+	return true;
 }
 
 void DrumController::shouldListen(int listenVal)
@@ -226,6 +233,14 @@ void DrumController::updateSynthParameters(bool trigger)
 		return;
 	}
 	
+	// Use the neural network if it is loaded
+	if (modelLoaded)
+	{
+		updateSynthParametersFromModel();
+		drum.trigger();
+		return;
+	}
+
 	auto& tonal = drum.getTonal();
 	tonal.setDecay(getModulatedParameterValue(0));
 	tonal.setTuning(getModulatedParameterValue(1));
@@ -272,4 +287,36 @@ float DrumController::getModulatedParameterValue(int parameterIndex)
 	// Base parameter value plus modulations
 	float value = mapping.parameterValues[parameterIndex] + energyMod + spectralMod;
 	return constrain(value, 0.0, 1.0);
+}
+
+void DrumController::updateSynthParametersFromModel()
+{
+	// Prepare input for model
+	modelInput[0] = spectralCentroid;
+	modelInput[1] = onsetEnergy;
+
+	// Convert input to tensor
+    torch::Tensor inputTensor = torch::from_blob(modelInput.data(), {1, 2}).clone();
+
+	// Perform inference
+    torch::Tensor outputTensor = model.forward({inputTensor}).toTensor();
+    outputTensor = outputTensor.view(-1);
+
+	// Copy outputTensor to outBuffer
+    for (int n = 0; n < 7; n++) {
+		modelOutput[n] = outputTensor[n].item<float>();
+    }
+
+	// Update synth parameters
+	auto& tonal = drum.getTonal();
+	tonal.setDecay(modelOutput[0]);
+	tonal.setTuning(modelOutput[1]);
+	
+	auto& noise = drum.getNoise();
+	noise.setDecay(modelOutput[2]);
+	noise.setTone(modelOutput[3]);
+	noise.setColor(modelOutput[4]);
+	
+	drum.setMixRatio(modelOutput[5]);
+	drum.setGain(modelOutput[6]);
 }

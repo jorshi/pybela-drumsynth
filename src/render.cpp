@@ -46,12 +46,6 @@ bool setup(BelaContext *context, void *userData)
 	// Setup processors
 	drum.prepare(context->audioSampleRate);
 	controller.prepare(context->audioSampleRate);
-
-	// Load the drum mapping model
-	AppOptions *opts = reinterpret_cast<AppOptions *>(userData);
-	if (!controller.loadModel(opts)) {
-		return false;
-	}
 	
 	// Initialize drum params
 	auto& noise = drum.getNoise();
@@ -71,6 +65,12 @@ bool setup(BelaContext *context, void *userData)
 	// Set up the GUI
 	gGui.setup(context->projectName);
 	gGuiController.setup(&gGui, "Drum Control");
+
+	// Load the drum mapping model
+	AppOptions *opts = reinterpret_cast<AppOptions *>(userData);
+	if (!controller.loadModel(opts)) {
+		return false;
+	}
 #endif
 	
 	// Arguments: name, default value, minimum, maximum, increment
