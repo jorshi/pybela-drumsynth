@@ -110,6 +110,15 @@ bool DrumController::process(float x)
 	return onsetUpdate;
 }
 
+bool DrumController::loadModel(AppOptions *opts)
+{
+	try {
+        model = torch::jit::load(opts->modelPath.c_str());
+    } catch (const c10::Error& e) {
+        std::cerr << "Error loading the model: " << e.msg() << std::endl;
+        return false;
+    }
+}
 
 void DrumController::shouldListen(int listenVal)
 {

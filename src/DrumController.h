@@ -4,12 +4,15 @@
  * Class that takes an incoming audio stream and extracts
  * information to control a drum
  */
- 
+ #pragma once
+
  #include <libraries/ne10/NE10.h>
  #include <vector>
+ #include <torch/script.h>
 
  #include "SnareDrum.h"
  #include "OnsetDetection.h"
+ #include "AppOptions.h"
  
  #define ONSET_BUFFER_SIZE 1024	// Circular buffer for onset features
  #define FFT_SIZE 512			// FFT size for onset spectral features
@@ -31,6 +34,7 @@ public:
 	
 	void prepare(double sr);
 	bool process(float x);
+	bool loadModel(AppOptions *opts);
 	
 	// Getters
 	OnsetDetection& getOnsetDetector() { return onset; };
@@ -83,6 +87,9 @@ private:
 	
 	std::vector<float> onsetEnergyVals;
 	std::vector<float> spectralCentroidVals;
+
+	// torch drum mapping model
+	torch::jit::script::Module model;
 	
 	// Private methods for creating audio -> parameter mappings
 	
