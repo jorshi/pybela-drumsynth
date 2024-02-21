@@ -40,6 +40,12 @@ DrumController::DrumController(SnareDrum& d)
 			mapping.parameterModAmount[i].push_back(0.0f);
 		}
 	}
+
+	// Torch Tensor options
+    options = torch::TensorOptions()
+        .dtype(torch::kFloat32)
+        .device(torch::kCPU)
+        .requires_grad(false);
 }
 
 DrumController::~DrumController()
@@ -90,16 +96,17 @@ bool DrumController::process(float x)
 	if (justTriggered && elapsedSamples >=  ENERGY_SIZE - LOOK_BACK && !triggeredDrum)
 	{
 		onsetEnergy = getSignalEnergy(ENERGY_SIZE);
-		updateSynthParameters(true);
+		// Don't trigger the drum here -- wait until the spectral processing is done
+		// updateSynthParameters(true);
 		triggeredDrum = true;
 	}
 	
 	// Wait longer to do the spectral processing for parameter adjustments
 	if (justTriggered && elapsedSamples >= FFT_SIZE - LOOK_BACK)
 	{
-		// Do spectral analysis and mapping
+		// Do spectral analysis and mapping -- update synth parameters and trigger drum
 		updateSpectralParameters();
-		updateSynthParameters(false);
+		updateSynthParameters(true);
 		justTriggered = false;
 		onsetUpdate = true;
 	}
@@ -120,8 +127,12 @@ bool DrumController::loadModel(AppOptions *opts)
         return false;
     }
 
+	// Initialize input and output tensors
 	modelInput.resize(2);
 	modelOutput.resize(7);
+	
+	// Prepare the model
+	model.eval();
 
 	modelLoaded = true;
 	return true;
@@ -186,6 +197,8 @@ void DrumController::processFFT()
 	for (int n = 0; n < FFT_SIZE; ++n)
 	{
 		fftIn[n].r = (ne10_float32_t) onsetBuffer[index] * window[n];
+		fftIn[n].i = 0.0;
+
 		if (++index >= ONSET_BUFFER_SIZE)
 			index = 0;
 	}
@@ -232,6 +245,8 @@ void DrumController::updateSynthParameters(bool trigger)
 		}
 		return;
 	}
+
+	rt_printf("Spectral Centroid: %f, Onset Energy: %f\n", spectralCentroid, onsetEnergy);
 	
 	// Use the neural network if it is loaded
 	if (modelLoaded)

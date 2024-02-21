@@ -90,9 +90,12 @@ private:
 
 	// torch drum mapping model
 	torch::jit::script::Module model;
+	torch::TensorOptions options;
+	
 	bool modelLoaded;
 	std::vector<float> modelInput;
 	std::vector<float> modelOutput;
+	
 	
 	// Private methods for creating audio -> parameter mappings
 	
