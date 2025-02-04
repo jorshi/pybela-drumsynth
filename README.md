@@ -1,34 +1,21 @@
 # pybela-drumsynth
 
-project originally by [@jorshi](https://github.com/jorshi)
-
 In this project, I explore how to incorporate pybela into an existing Bela project for audio-driven drum synthesis. The main idea of that project is to use audio from a microphone to control a drum synthesizer using onset detection and audio feature extraction -- which map to synthesis parameter updates.
 
-## Getting Started
+## Setup
 
-1. First, you'll need to have your Bela setup according to the [pybela + pytorch tutorial](https://github.com/pelinski/pybela-pytorch-xc-tutorial). This includes the experimental image and the Docker container for cross-compilation. Don't worry about starting the Jupyter server within Docker though.
+Follow the instructions in [bela-setup.md](bela-setup.md) to setup your Bela and the Docker cross-compilation container.
 
-2. Then on your computer (outside of Docker)
+Then, on your computer and in this current folder, install the python environment either with `pip -r requirements.txt` or with `uv`.
 
-```
-git clone https://github.com/jorshi/pybela-drumsynth.git
-```
+## Getting started
 
-3. Install python requirements
+Start a Jupyter server with (or open the `drumsynth_pybela.ipynb` notebook in your favorite editor):
 
-```
-cd pybela-drumsynth
-pip install -r requirements.txt
-```
-
-## pybela and model training
-
-1. Start a Jupyter server:
-
-```
-jupyter notebook
+```bash
+jupyter notebook # or `uv run jupyter notebook`
 ```
 
 And open `drumsynth_pybela.ipynb` -- follow the tutorial in the notebook. You'll need to have your Bela connected at this point.
 
-In the notebook you'll copy the `pybela-drumsynth` code over to Bela, log audio features from Bela to Python, train a model, and copy over to Bela. There are also instructions on compiling [wip] inference code and running that on Bela.
+In the notebook you'll copy the drumsynth code over to Bela, log audio features from Bela to Python, train a model, and copy it over to Bela. There are also instructions on compiling inference code and running that on Bela.
